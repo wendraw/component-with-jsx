@@ -1,14 +1,13 @@
-function createElement(Class, attrs, ...children) {
+function createElement(Class, attributes, ...children) {
   let o;
-
   if (typeof Class === "string") {
     o = new Wrapper(Class);
   } else {
-    o = new Class({ timer: 1 });
+    o = new Class();
   }
 
-  for (let name in attrs) {
-    o.setAttribute(name, attrs[name]);
+  for (let name in attributes) {
+    o.setAttribute(name, attributes[name]);
   }
 
   for (let child of children) {
@@ -16,6 +15,16 @@ function createElement(Class, attrs, ...children) {
   }
 
   return o;
+}
+
+class Text {
+  constructor(data) {
+    this.root = document.createTextNode(data);
+  }
+
+  mountTo(parent) {
+    parent.appendChild(this.root);
+  }
 }
 
 class Wrapper {
@@ -33,35 +42,24 @@ class Wrapper {
   }
 
   mountTo(parent) {
-    parent.appendChild(this.root);
-
     for (let child of this.children) {
       if (typeof child === "string") {
         child = new Text(child);
       }
       child.mountTo(this.root);
     }
-  }
-}
-
-class Text {
-  constructor(type) {
-    this.root = document.createTextNode(type);
-  }
-
-  mountTo(parent) {
     parent.appendChild(this.root);
   }
 }
 
 class MyComponent {
   constructor() {
-    this.root = document.createElement("div");
     this.children = [];
+    this.attributes = new Map();
   }
 
   setAttribute(name, value) {
-    this.root.setAttribute(name, value);
+    this.attributes.set(name, value);
   }
 
   appendChild(child) {
@@ -79,6 +77,7 @@ class MyComponent {
   render() {
     return (
       <article>
+        <h1>{this.attributes.get("title")}</h1>
         <header>I'm a header</header>
         {this.slot}
         <footer>I'm a footer</footer>
@@ -87,8 +86,16 @@ class MyComponent {
   }
 }
 
+let component = (
+  <MyComponent title="I'm a title">
+    <div>text text</div>
+  </MyComponent>
+);
+component.mountTo(document.body);
+
+//////////////////////////////////////////////
 /* class Div {
-  constructor() {
+  constructor(config) {
     this.root = document.createElement("div");
     this.children = [];
   }
@@ -102,80 +109,61 @@ class MyComponent {
   }
 
   mountTo(parent) {
-    parent.appendChild(this.root);
-
     for (let child of this.children) {
       if (typeof child === "string") {
         child = new Text(child);
       }
       child.mountTo(this.root);
     }
-  }
-} */
-
-/* class Parent {
-  constructor(config) {
-    this.root = document.createElement("div");
-  }
-
-  setAttribute(name, value) {
-    this.root.setAttribute(name, value);
-  }
-
-  appendChild(child) {
-    child.mountTo(this.root);
-  }
-
-  mountTo(parent) {
     parent.appendChild(this.root);
   }
 }
 
-class Child {
-  constructor(config) {
-    this.root = document.createElement("div");
-  }
-
-  setAttribute(name, value) {
-    this.root.setAttribute(name, value);
-  }
-
-  appendChild(child) {
-    child.mountTo(this.root);
-  }
-
-  mountTo(parent) {
-    parent.appendChild(this.root);
-  }
-} */
-
-/* let component = (
-  <Div id="a" class="b" style="width:100px;height:100px;background-color:#f44">
-    <Div></Div>
-    <Div></Div>
-    <Div></Div>
+let component = (
+  <Div
+    id="idx"
+    class="cls"
+    style="width:200px;height:200px;background-color:lightgreen"
+  >
+    text text text
+    <div style="width:100px;height:100px;background-color:lightblue"></div>
+    <div style="width:100px;height:100px;background-color:lightpink"></div>
   </Div>
-); */
-// 上面的代码会翻译成下面这样
-/* var component = createElement(
-  Parent,
-  {
-    id: "a",
-  },
-  createElement(Child, null),
-  createElement(Child, null),
-  createElement(Child, null)
-); */
+);
+component.mountTo(document.body); */
+//////////////////////////////////////////////
 
-/* let component = (
-  <div style="width:100px;height:100px"><div>{new Wrapper("span")}</div></div>
-); */
+//////////////////////////////////////////////
+/* class Parent {
+  // config
+  constructor(config) {
+    console.log("Parent::constructor", config);
+  }
+
+  // property
+  set id(value) {
+    console.log("Parent::id", value);
+  }
+
+  // attribute
+  setAttribute(name, value) {
+    console.log("Parent::setAttribute", name, value);
+  }
+
+  // children
+  appendChild(child) {
+    console.log("Parent::appendChild", child);
+  }
+}
+
+class Child {} 
 
 let component = (
-  <MyComponent>
-    <div>text text</div>
-  </MyComponent>
+  <Parent id="idx">
+    <Child></Child>
+    <Child></Child>
+  </Parent>
 );
-
-component.mountTo(document.body);
 console.log(component);
+*/
+//////////////////////////////////////////
